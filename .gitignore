@@ -45,5 +45,6 @@ build/
 *.db
 db/*
 
-mvnw.cmd
-mvnw
+/mvnw.cmd
+/mvnw
+
