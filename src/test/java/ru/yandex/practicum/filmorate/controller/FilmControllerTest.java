@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmControllerTest {
     private FilmController filmController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     @BeforeEach
     public void beforeEach() {
         filmController = new FilmController();
@@ -53,6 +54,7 @@ class FilmControllerTest {
                 () -> filmController.add(filmFail));
         assertEquals("Дата релиза фильма должна быть не ранее 18 декабря 1985 года", exception.getMessage());
     }
+
     @Test
     public void shouldThrowDurationIsNotPositiveExceptionIfItIs() {
         Film filmFail = new Film(null, "test", String.format("%-200s", ""),
