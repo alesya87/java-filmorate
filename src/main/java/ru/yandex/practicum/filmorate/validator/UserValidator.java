@@ -15,15 +15,16 @@ public class UserValidator {
         checkName(user);
         checkBirthday(user);
     }
+
     private static void checkEmail(User user) {
-        String email  = user.getEmail();
+        String email = user.getEmail();
         if (email == null || email.isBlank() || !email.contains("@")) {
             throw new NotValidEmailException("Email не может быть пустым и должен сожержать символ @");
         }
     }
 
     private static void checkLogin(User user) {
-        String login  = user.getLogin();
+        String login = user.getLogin();
         if (login == null || login.isBlank() || login.contains(" ")) {
             throw new NotValidLoginException("Логин не может быть пустым и не должен сожержать пробелы");
         }

@@ -9,8 +9,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 
 public class FilmValidator {
-    private final static int MAX_FILM_NAME_LENGTH = 200;
-    private final static LocalDate MIN_REALISE_DATE = LocalDate.of(1895, 12, 18);
+    private static final int MAX_FILM_NAME_LENGTH = 200;
+    private static final LocalDate MIN_REALISE_DATE = LocalDate.of(1895, 12, 18);
 
     public static void startValidate(Film film) {
         checkIfNameIsEmpty(film);
