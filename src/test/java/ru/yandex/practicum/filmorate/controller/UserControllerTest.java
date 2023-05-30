@@ -2,12 +2,8 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.film.*;
-import ru.yandex.practicum.filmorate.exception.user.NoSuchUserException;
-import ru.yandex.practicum.filmorate.exception.user.NotValidBirthdayException;
-import ru.yandex.practicum.filmorate.exception.user.NotValidEmailException;
-import ru.yandex.practicum.filmorate.exception.user.NotValidLoginException;
-import ru.yandex.practicum.filmorate.model.Film;
+
+import ru.yandex.practicum.filmorate.exception.user.*;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -15,9 +11,10 @@ import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UsewrControllerTest {
+class UserControllerTest {
     private UserController userController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     @BeforeEach
     public void beforeEach() {
         userController = new UserController();
