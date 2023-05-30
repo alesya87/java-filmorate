@@ -48,3 +48,5 @@ db/*
 mvnw
 mvnw.cmd
 
+.DS_Store
+
