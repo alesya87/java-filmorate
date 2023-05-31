@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.film.NoSuchFilmException;
+import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
+import ru.yandex.practicum.filmorate.validator.Validator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,14 +14,14 @@ import java.util.Map;
 @RestController
 @RequestMapping(path = "/films")
 public class FilmController {
+
     @Getter
     private final Map<Integer, Film> films = new HashMap<>();
-    private static int increment;
     private int id;
 
     @PostMapping
     public Film add(@RequestBody Film film) {
-        FilmValidator.startValidate(film);
+        Validator.startValidate(film);
         film.setId(generateId());
         films.put(film.getId(), film);
         return film;
@@ -40,8 +40,7 @@ public class FilmController {
     }
 
     private Integer generateId() {
-        id = ++increment;
-        return id;
+        return ++id;
     }
 
     private void checkFilmExists(Film film) {

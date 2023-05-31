@@ -3,7 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ru.yandex.practicum.filmorate.exception.user.*;
+import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -21,28 +22,28 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldTrowNotValidLoginExceptionIfItIs() {
+    public void shouldTrowValidateExceptionIfLoginIsEmptyOrContainsSpace() {
         User user = new User(null, "a@ru151.ru", "alesya 2", "Alesya",
                 LocalDate.parse("1967-03-25", dateTimeFormatter));
-        Exception exception = assertThrows(NotValidLoginException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> userController.add(user));
         assertEquals("Логин не может быть пустым и не должен сожержать пробелы", exception.getMessage());
     }
 
     @Test
-    public void shouldTrowNotValidEmailExceptionIfItIs() {
+    public void shouldTrowNotValidateExceptionIfEmailIsNotValid() {
         User user = new User(null, "aru151.ru", "alesya", "Alesya",
                 LocalDate.parse("1967-03-25", dateTimeFormatter));
-        Exception exception = assertThrows(NotValidEmailException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> userController.add(user));
         assertEquals("Email не может быть пустым и должен сожержать символ @", exception.getMessage());
     }
 
     @Test
-    public void shouldTrowNotValidBirthdayExceptionIfItIs() {
+    public void shouldTrowValidateExceptionIfBirthdayIsAfterCurrentDate() {
         User user = new User(null, "a@ru151.ru", "alesya", "Alesya",
                 LocalDate.now().plusDays(1));
-        Exception exception = assertThrows(NotValidBirthdayException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> userController.add(user));
         assertEquals("Дата рождения должен быть не позднее текущей даты", exception.getMessage());
     }
@@ -60,7 +61,7 @@ class UserControllerTest {
 
     @Test
     public void shouldSetNameLoginIfNameIsEmpty() {
-        User user = new User(1, "a@ru151.ru", "alesya", "",
+        User user = new User(null, "a@ru151.ru", "alesya", "",
                 LocalDate.now());
         userController.add(user);
         assertEquals("alesya", userController.getUsers().get(1).getName());

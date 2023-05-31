@@ -3,7 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ru.yandex.practicum.filmorate.exception.film.*;
+import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -21,45 +22,45 @@ class FilmControllerTest {
     }
 
     @Test
-    public void shouldTrowEmptyFilmNameExceptionIfNameIsEmpty() {
+    public void shouldTrowValidateExceptionIfFilmNameIsEmpty() {
         Film film = new Film(null, "", "adipisicing",
                 LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
-        Exception exception = assertThrows(EmptyFilmNameException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(film));
         assertEquals("Название фильма не может быть пустым", exception.getMessage());
     }
 
     @Test
-    public void shouldTrowDescriptionLengthMoreThanLimitExceptionIfDescriptionIsLongerThan200() {
+    public void shouldTrowValidateExceptionIfDescriptionLengthMoreThan200() {
         Film film = new Film(null, "test", String.format("%-200s", ""),
                 LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
         filmController.add(film);
         assertEquals(1, filmController.getFilms().size());
         Film filmFail = new Film(null, "test", String.format("%-201s", ""),
                 LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
-        Exception exception = assertThrows(DescriptionLengthMoreThanLimitException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(filmFail));
         assertEquals("Длина названия фильма не может быть больше 200 символов", exception.getMessage());
     }
 
     @Test
-    public void shouldThrowNotValidReleaseDateExceptionIfItIsEarlierThan18951218() {
+    public void shouldThrowValidateExceptionIfReleaseDateIsEarlierThan18951218() {
         Film film = new Film(null, "test", String.format("%-200s", ""),
                 LocalDate.parse("1895-12-18", dateTimeFormatter), 100);
         filmController.add(film);
         assertEquals(1, filmController.getFilms().size());
         Film filmFail = new Film(null, "test", String.format("%-20s", ""),
                 LocalDate.parse("1895-12-17", dateTimeFormatter), 100);
-        Exception exception = assertThrows(NotValidRealiseDateException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(filmFail));
         assertEquals("Дата релиза фильма должна быть не ранее 18 декабря 1985 года", exception.getMessage());
     }
 
     @Test
-    public void shouldThrowDurationIsNotPositiveExceptionIfItIs() {
+    public void shouldThrowValidateExceptionIfDurationIsNotPositive() {
         Film filmFail = new Film(null, "test", String.format("%-200s", ""),
                 LocalDate.parse("1895-12-18", dateTimeFormatter), -100);
-        Exception exception = assertThrows(DurationIsNotPositiveException.class,
+        Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(filmFail));
         assertEquals("Длительность фильма должна быть положительной", exception.getMessage());
     }

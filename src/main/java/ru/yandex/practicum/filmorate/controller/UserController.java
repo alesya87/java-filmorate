@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.user.NoSuchUserException;
+import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
+import ru.yandex.practicum.filmorate.validator.Validator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,12 +16,11 @@ import java.util.Map;
 public class UserController {
     @Getter
     private final Map<Integer, User> users = new HashMap<>();
-    private static int increment;
     private int id;
 
     @PostMapping
     public User add(@RequestBody User user) {
-        UserValidator.startValidate(user);
+        Validator.startValidate(user);
         user.setId(generateId());
         users.put(user.getId(), user);
         return user;
@@ -40,8 +39,7 @@ public class UserController {
     }
 
     private Integer generateId() {
-        id = ++increment;
-        return id;
+        return ++id;
     }
 
     private void checkUserExists(User user) {
