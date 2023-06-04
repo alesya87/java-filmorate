@@ -15,9 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserControllerTest {
     private UserController userController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     private User userToCreateOk = new User(null, "a@ru151.ru", "alesya2", "Alesya",
-            LocalDate.parse("1967-03-25", dateTimeFormatter));;
+            LocalDate.parse("1967-03-25", dateTimeFormatter));
 
     @BeforeEach
     public void beforeEach() {
