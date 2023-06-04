@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.validator;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
+@UtilityClass
 public class Validator {
     private static final int MAX_FILM_NAME_LENGTH = 200;
     private static final LocalDate MIN_REALISE_DATE = LocalDate.of(1895, 12, 18);

@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.Getter;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
@@ -15,7 +14,6 @@ import java.util.Map;
 @RequestMapping(path = "/films")
 public class FilmController {
 
-    @Getter
     private final Map<Integer, Film> films = new HashMap<>();
     private int id;
 
@@ -30,6 +28,7 @@ public class FilmController {
     @PutMapping
     public Film update(@RequestBody Film film) {
         checkFilmExists(film);
+        Validator.startValidate(film);
         films.put(film.getId(), film);
         return film;
     }
@@ -45,8 +44,8 @@ public class FilmController {
 
     private void checkFilmExists(Film film) {
         int id = film.getId();
-        if (!films.containsKey(id)) {
-            throw new NoSuchFilmException("Фильма с id " + id + " не существует");
+        if (films.get(id) == null) {
+            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
         }
     }
 }

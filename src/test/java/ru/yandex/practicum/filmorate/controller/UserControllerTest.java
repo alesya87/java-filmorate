@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -16,13 +16,16 @@ class UserControllerTest {
     private UserController userController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private User userToCreateOk = new User(null, "a@ru151.ru", "alesya2", "Alesya",
+            LocalDate.parse("1967-03-25", dateTimeFormatter));;
+
     @BeforeEach
     public void beforeEach() {
         userController = new UserController();
     }
 
     @Test
-    public void shouldTrowValidateExceptionIfLoginIsEmptyOrContainsSpace() {
+    public void shouldTrowValidateExceptionIfLoginIsEmptyOrContainsSpaceWhenCreate() {
         User user = new User(null, "a@ru151.ru", "alesya 2", "Alesya",
                 LocalDate.parse("1967-03-25", dateTimeFormatter));
         Exception exception = assertThrows(ValidateException.class,
@@ -31,7 +34,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldTrowNotValidateExceptionIfEmailIsNotValid() {
+    public void shouldTrowNotValidateExceptionIfEmailIsNotValidWhenCreate() {
         User user = new User(null, "aru151.ru", "alesya", "Alesya",
                 LocalDate.parse("1967-03-25", dateTimeFormatter));
         Exception exception = assertThrows(ValidateException.class,
@@ -40,7 +43,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldTrowValidateExceptionIfBirthdayIsAfterCurrentDate() {
+    public void shouldTrowValidateExceptionIfBirthdayIsAfterCurrentDateWhenCreate() {
         User user = new User(null, "a@ru151.ru", "alesya", "Alesya",
                 LocalDate.now().plusDays(1));
         Exception exception = assertThrows(ValidateException.class,
@@ -49,21 +52,51 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldThrowNoSuchUserExceptionItIsEmpty() {
+    public void shouldSetNameLoginIfNameIsEmptyWhenCreate() {
+        User user = new User(null, "a@ru151.ru", "alesya", "",
+                LocalDate.now());
+        userController.add(user);
+        assertEquals("alesya", userController.getAllUsers().get(0).getName());
+    }
+
+    @Test
+    public void shouldTrowValidateExceptionIfLoginIsEmptyOrContainsSpaceWhenUpdate() {
+        userController.add(userToCreateOk);
+        User userToUpdateFail = new User(1, "a@ru151.ru", "alesya 2", "Alesya",
+                LocalDate.parse("1967-03-25", dateTimeFormatter));
+        Exception exception = assertThrows(ValidateException.class,
+                () -> userController.update(userToUpdateFail));
+        assertEquals("Логин не может быть пустым и не должен сожержать пробелы", exception.getMessage());
+    }
+
+    @Test
+    public void shouldTrowNotValidateExceptionIfEmailIsNotValidWhenUpdate() {
+        userController.add(userToCreateOk);
+        User userToUpdateFail = new User(1, "aru151.ru", "alesya", "Alesya",
+                LocalDate.parse("1967-03-25", dateTimeFormatter));
+        Exception exception = assertThrows(ValidateException.class,
+                () -> userController.update(userToUpdateFail));
+        assertEquals("Email не может быть пустым и должен сожержать символ @", exception.getMessage());
+    }
+
+    @Test
+    public void shouldTrowValidateExceptionIfBirthdayIsAfterCurrentDateWhenUpdate() {
+        userController.add(userToCreateOk);
+        User userToUpdateFail = new User(1, "a@ru151.ru", "alesya", "Alesya",
+                LocalDate.now().plusDays(1));
+        Exception exception = assertThrows(ValidateException.class,
+                () -> userController.update(userToUpdateFail));
+        assertEquals("Дата рождения должен быть не позднее текущей даты", exception.getMessage());
+    }
+
+    @Test
+    public void shouldThrowNEntityNotFoundExceptionItIsEmptyWhenUpdate() {
         User user = new User(1, "a@ru151.ru", "alesya", "Alesya",
                 LocalDate.now());
-        Exception exception = assertThrows(NoSuchUserException.class,
+        Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> userController.update(user));
         System.out.println(exception.getMessage());
         assertEquals("Пользователя с id 1 не существует", exception.getMessage());
 
-    }
-
-    @Test
-    public void shouldSetNameLoginIfNameIsEmpty() {
-        User user = new User(null, "a@ru151.ru", "alesya", "",
-                LocalDate.now());
-        userController.add(user);
-        assertEquals("alesya", userController.getUsers().get(1).getName());
     }
 }
