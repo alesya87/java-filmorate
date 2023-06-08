@@ -1,0 +1,60 @@
+package ru.yandex.practicum.filmorate.service;
+
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.validator.Validator;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@AllArgsConstructor
+public class FilmService {
+    @Autowired
+    private final FilmStorage filmStorage;
+
+    @SuppressWarnings("checkstyle:MemberName")
+    private final int DEFAULT_FILMS_COUNT = 10;
+
+    public Film add(Film film) {
+        Validator.startValidate(film);
+        filmStorage.add(film);
+        return film;
+    }
+
+    public Film update(Film film) {
+        filmStorage.checkFilmExists(film);
+        Validator.startValidate(film);
+        filmStorage.update(film);
+        return film;
+    }
+
+    public Film getFilmById(Integer id) {
+        filmStorage.checkFilmExistsById(id);
+        return filmStorage.getFilmById(id);
+    }
+
+    public List<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
+
+    public void addLike(Integer id, Integer userId) {
+        Film film = getFilmById(id);
+        film.getLikes().add(userId);
+    }
+
+    public void deleteLike(Integer id, Integer userId) {
+        Film film = getFilmById(id);
+        film.getLikes().remove(userId);
+    }
+
+    public List<Film> getFilmsByLikesCount(Integer count) {
+        return filmStorage.getAllFilms().stream()
+                .sorted(Comparator.comparing(Film::getLikesCount).reversed())
+                .limit(count).collect(Collectors.toList());
+    }
+}

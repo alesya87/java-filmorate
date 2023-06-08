@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,17 +19,17 @@ class FilmControllerTest {
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     Film filmToCreateOk = new Film(null, "Alesya", "adipisicing",
-            LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
+            LocalDate.parse("1967-03-25", dateTimeFormatter), 100, null);
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
     }
 
     @Test
     public void shouldTrowValidateExceptionIfFilmNameIsEmptyWhenCreateWhenCreate() {
         Film film = new Film(null, "", "adipisicing",
-                LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
+                LocalDate.parse("1967-03-25", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(film));
         assertEquals("Название фильма не может быть пустым", exception.getMessage());
@@ -36,11 +38,11 @@ class FilmControllerTest {
     @Test
     public void shouldTrowValidateExceptionIfDescriptionLengthMoreThan200WhenCreate() {
         Film film = new Film(null, "test", String.format("%-200s", ""),
-                LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
+                LocalDate.parse("1967-03-25", dateTimeFormatter), 100, null);
         filmController.add(film);
         assertEquals(1, filmController.getAllFilms().size());
         Film filmFail = new Film(null, "test", String.format("%-201s", ""),
-                LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
+                LocalDate.parse("1967-03-25", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(filmFail));
         assertEquals("Длина названия фильма не может быть больше 200 символов", exception.getMessage());
@@ -49,11 +51,11 @@ class FilmControllerTest {
     @Test
     public void shouldThrowValidateExceptionIfReleaseDateIsEarlierThan18951218WhenCreate() {
         Film film = new Film(null, "test", String.format("%-200s", ""),
-                LocalDate.parse("1895-12-18", dateTimeFormatter), 100);
+                LocalDate.parse("1895-12-18", dateTimeFormatter), 100, null);
         filmController.add(film);
         assertEquals(1, filmController.getAllFilms().size());
         Film filmFail = new Film(null, "test", String.format("%-20s", ""),
-                LocalDate.parse("1895-12-17", dateTimeFormatter), 100);
+                LocalDate.parse("1895-12-17", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(filmFail));
         assertEquals("Дата релиза фильма должна быть не ранее 18 декабря 1985 года", exception.getMessage());
@@ -62,7 +64,7 @@ class FilmControllerTest {
     @Test
     public void shouldThrowValidateExceptionIfDurationIsNotPositiveWhenCreate() {
         Film filmFail = new Film(null, "test", String.format("%-200s", ""),
-                LocalDate.parse("1895-12-18", dateTimeFormatter), -100);
+                LocalDate.parse("1895-12-18", dateTimeFormatter), -100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.add(filmFail));
         assertEquals("Длительность фильма должна быть положительной", exception.getMessage());
@@ -72,7 +74,7 @@ class FilmControllerTest {
     public void shouldTrowValidateExceptionIfFilmNameIsEmptyWhenUpdate() {
         filmController.add(filmToCreateOk);
         Film filmToUpdateFail = new Film(1, "", "adipisicing",
-                LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
+                LocalDate.parse("1967-03-25", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.update(filmToUpdateFail));
         assertEquals("Название фильма не может быть пустым", exception.getMessage());
@@ -83,7 +85,7 @@ class FilmControllerTest {
         filmController.add(filmToCreateOk);
         assertEquals(1, filmController.getAllFilms().size());
         Film filmToUpdateFail = new Film(1, "test", String.format("%-202s", ""),
-                LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
+                LocalDate.parse("1967-03-25", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.update(filmToUpdateFail));
         assertEquals("Длина названия фильма не может быть больше 200 символов", exception.getMessage());
@@ -93,11 +95,11 @@ class FilmControllerTest {
     public void shouldThrowValidateExceptionIfReleaseDateIsEarlierThan18951218WhenUpdate() {
         filmController.add(filmToCreateOk);
         Film filmToUpdateOk = new Film(1, "test", String.format("%-200s", ""),
-                LocalDate.parse("1895-12-18", dateTimeFormatter), 100);
+                LocalDate.parse("1895-12-18", dateTimeFormatter), 100, null);
         filmController.update(filmToUpdateOk);
         assertEquals(1, filmController.getAllFilms().size());
         Film filmToUpdateFail = new Film(1, "test", String.format("%-20s", ""),
-                LocalDate.parse("1895-12-17", dateTimeFormatter), 100);
+                LocalDate.parse("1895-12-17", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.update(filmToUpdateFail));
         assertEquals("Дата релиза фильма должна быть не ранее 18 декабря 1985 года", exception.getMessage());
@@ -107,7 +109,7 @@ class FilmControllerTest {
     public void shouldThrowValidateExceptionIfDurationIsNotPositiveWhenUpdate() {
         filmController.add(filmToCreateOk);
         Film filmToUpdateFail = new Film(1, "test", String.format("%-200s", ""),
-                LocalDate.parse("1895-12-18", dateTimeFormatter), -100);
+                LocalDate.parse("1895-12-18", dateTimeFormatter), -100, null);
         Exception exception = assertThrows(ValidateException.class,
                 () -> filmController.update(filmToUpdateFail));
         assertEquals("Длительность фильма должна быть положительной", exception.getMessage());
@@ -116,7 +118,7 @@ class FilmControllerTest {
     @Test
     public void shouldThrowEntityNotFoundExceptionIfFilmEmptyWhenUpdate() {
         Film filmToUpdateFail = new Film(1, "test", String.format("%-2s", ""),
-                LocalDate.parse("1895-12-18", dateTimeFormatter), 100);
+                LocalDate.parse("1895-12-18", dateTimeFormatter), 100, null);
         Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> filmController.update(filmToUpdateFail));
         assertEquals("Фильма с id 1 не существует", exception.getMessage());
