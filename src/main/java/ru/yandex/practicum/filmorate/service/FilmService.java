@@ -17,9 +17,6 @@ public class FilmService {
     @Autowired
     private final FilmStorage filmStorage;
 
-    @SuppressWarnings("checkstyle:MemberName")
-    private final int DEFAULT_FILMS_COUNT = 10;
-
     public Film add(Film film) {
         Validator.startValidate(film);
         filmStorage.add(film);
