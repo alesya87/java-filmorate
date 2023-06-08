@@ -88,9 +88,9 @@ class UserControllerTest {
         User userToUpdateFail = new User(1, "a@ru151.ru", "alesya", "Alesya",
                 LocalDate.now().plusDays(1));
         System.out.println(userController.getAllUsers());
-        //Exception exception = assertThrows(ValidateException.class,
-               // () -> userController.update(userToUpdateFail));
-       // assertEquals("Дата рождения должен быть не позднее текущей даты", exception.getMessage());
+        Exception exception = assertThrows(ValidateException.class,
+               () -> userController.update(userToUpdateFail));
+        assertEquals("Дата рождения должен быть не позднее текущей даты", exception.getMessage());
     }
 
     @Test

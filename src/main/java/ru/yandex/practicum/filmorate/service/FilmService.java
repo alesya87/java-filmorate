@@ -40,11 +40,13 @@ public class FilmService {
     }
 
     public void addLike(Integer id, Integer userId) {
+        Validator.checkIdIsPositive(userId);
         Film film = getFilmById(id);
         film.getLikes().add(userId);
     }
 
     public void deleteLike(Integer id, Integer userId) {
+        Validator.checkIdIsPositive(userId);
         Film film = getFilmById(id);
         film.getLikes().remove(userId);
     }
