@@ -3,9 +3,12 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -13,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
+    @Autowired
     private UserController userController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private User userToCreateOk = new User(null, "a@ru151.ru", "alesya2", "Alesya",
@@ -20,7 +24,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
     }
 
     @Test
@@ -83,8 +87,9 @@ class UserControllerTest {
         userController.add(userToCreateOk);
         User userToUpdateFail = new User(1, "a@ru151.ru", "alesya", "Alesya",
                 LocalDate.now().plusDays(1));
+        System.out.println(userController.getAllUsers());
         Exception exception = assertThrows(ValidateException.class,
-                () -> userController.update(userToUpdateFail));
+               () -> userController.update(userToUpdateFail));
         assertEquals("Дата рождения должен быть не позднее текущей даты", exception.getMessage());
     }
 

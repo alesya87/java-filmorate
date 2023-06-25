@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.validator;
 
 import lombok.experimental.UtilityClass;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -24,6 +25,12 @@ public class Validator {
         checkLogin(user);
         checkName(user);
         checkBirthday(user);
+    }
+
+    public static void checkIdIsPositive(int id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Ресурс с id " + id + " не найден");
+        }
     }
 
     private static void checkIfNameIsEmpty(Film film) {
