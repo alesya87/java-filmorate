@@ -4,10 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -54,5 +52,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (id == null || films.get(id) == null) {
             throw new EntityNotFoundException("Фильма с id " + id + " не существует");
         }
+    }
+
+    @Override
+    public List<Film> getFilmsByLikesCount(Integer count) {
+        return getAllFilms().stream()
+                .sorted(Comparator.comparing(Film::getRating).reversed())
+                .limit(count).collect(Collectors.toList());
     }
 }

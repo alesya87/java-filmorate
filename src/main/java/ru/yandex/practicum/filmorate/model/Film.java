@@ -14,6 +14,7 @@ public class Film {
     private LocalDate releaseDate;
     private int duration;
     private Set<Integer> likes = new HashSet<>();
+    private int rating;
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
@@ -23,7 +24,7 @@ public class Film {
         this.duration = duration;
     }
 
-    public int getLikesCount() {
+    public int getRating() {
         return likes.size();
     }
 }
