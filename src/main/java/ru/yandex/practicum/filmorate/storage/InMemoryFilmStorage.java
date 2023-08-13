@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,8 +58,25 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByLikesCount(Integer count) {
-        return getAllFilms().stream()
-                .sorted(Comparator.comparing(Film::getLikesSize).reversed())
+        List<Film> films = getAllFilms().stream()
+                .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
                 .limit(count).collect(Collectors.toList());
+        Collections.reverse(films);
+        return films;
+    }
+
+    @Override
+    public MpaRating getMpaRatingById(Integer id) {
+        return null;
+    }
+
+    @Override
+    public Set<Genre> getGenresByFilmId(Integer id) {
+        return null;
+    }
+
+    @Override
+    public boolean linkFilmWithGenre(Integer filmId, Integer genreId) {
+        return false;
     }
 }

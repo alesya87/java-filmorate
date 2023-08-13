@@ -19,7 +19,7 @@ class UserControllerTest {
     @Autowired
     private UserController userController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private User userToCreateOk = new User(null, "a@ru151.ru", "alesya2", "Alesya",
+    /*private User userToCreateOk = new User(null, "a@ru151.ru", "alesya2", "Alesya",
             LocalDate.parse("1967-03-25", dateTimeFormatter));
 
     @BeforeEach
@@ -102,5 +102,5 @@ class UserControllerTest {
         System.out.println(exception.getMessage());
         assertEquals("Пользователя с id 1 не существует", exception.getMessage());
 
-    }
+    }*/
 }

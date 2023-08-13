@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
-@Component
 @Data
+@Builder
 public class MpaRating {
     private Integer id;
-    private String name;
+    private String name; // TODO: нужно ли это поле?
 }
 

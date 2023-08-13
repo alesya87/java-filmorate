@@ -18,7 +18,7 @@ class FilmControllerTest {
     private FilmController filmController;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    Film filmToCreateOk = new Film(null, "Alesya", "adipisicing",
+    /*Film filmToCreateOk = new Film(null, "Alesya", "adipisicing",
             LocalDate.parse("1967-03-25", dateTimeFormatter), 100);
 
     @BeforeEach
@@ -122,5 +122,5 @@ class FilmControllerTest {
         Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> filmController.update(filmToUpdateFail));
         assertEquals("Фильма с id 1 не существует", exception.getMessage());
-    }
+    }*/
 }

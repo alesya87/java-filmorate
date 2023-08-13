@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @ConditionalOnProperty(name = "storage.type", havingValue = "inMemory")
@@ -44,17 +44,35 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void checkUserExists(User user) {
-        int id = user.getId();
-        if (users.get(id) == null) {
-            throw new EntityNotFoundException("Пользователя с id " + id + " не существует");
-        }
+    public void addFriend(Integer id, Integer friendId) {
+        User user = getUserById(id);
+        User friend = getUserById(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(id);
     }
 
     @Override
-    public void checkUserExistsById(Integer id) {
-        if (id == null || users.get(id) == null) {
-            throw new EntityNotFoundException("Пользователя с id " + id + " не существует");
-        }
+    public void deleteFriend(Integer id, Integer friendId) {
+        User user = getUserById(id);
+        User friend = getUserById(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(id);
+    }
+
+    @Override
+    public List<User> getAllFriends(Integer id) {
+        User user = users.get(id);
+        return user.getFriends().stream().map(friendId -> getUserById(friendId))
+        .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getMutualFriends(Integer id, Integer otherId) {
+        User user = getUserById(id);
+        User otherUser = getUserById(otherId);
+        return user.getFriends().stream()
+                .filter(friendId -> otherUser.getFriends().contains(friendId))
+                .map(friendId -> getUserById(friendId))
+                .collect(Collectors.toList());
     }
 }
