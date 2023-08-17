@@ -14,25 +14,10 @@ import java.util.*;
 @ConditionalOnProperty(value = "user.storage.type", havingValue = "DB")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final String sqlUpdateUserById = "update users set name = ?, login = ?, email = ?, birthday = ? where id = ?";
-    private final String sqlGetUserById = "select id, name, login, email, birthday from users where id = ?";
-    private final String sqlGetFriendsIdByUserId = "select friend_id from friends where user_id = ?";
-    private final String sqlGetAllUsers = "select id, name, login, email, birthday from users";
-    private final String sqlAddFriend = "insert into friends(user_id, friend_id, status) values (?, ?, ?)";
-    private final String sqlDeleteFriend = "delete from friends where user_id = ? and friend_id = ?";
-    private final String sqlGetFriendsByUserId = "select id, name, login, email, birthday " +
-            "from users u " +
-            "inner join friends f on u.id = f.friend_id " +
-            "where f.user_id = ?";
-    private final String sqlGetMutualFriends = "select * from users where id in (select f.friend_id " +
-            "from friends as f " +
-            "inner join friends as f2 on f.friend_id = f2.friend_id " +
-            "where f.user_id = ? and f2.user_id = ?)"; // TODO: можно ли переписать без вложенного селекта?
-    private final String sqlSelectForFriendStatus = "select status from friends where user_id = ? and friend_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-    } // TODO: где он создается? засчет аннотации репозиторий?
+    }
 
     @Override
     public User add(User user) {
@@ -48,15 +33,17 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User user) {
+        String sqlUpdateUserById = "update users set name = ?, login = ?, email = ?, birthday = ? where id = ?";
         jdbcTemplate.update(sqlUpdateUserById, user.getName(), user.getLogin(), user.getEmail(), user.getBirthday(), user.getId());
         return user;
     }
 
     @Override
     public User getUserById(Integer id) {
+        String sqlGetUserById = "select id, name, login, email, birthday from users where id = ?";
         try {
             User user = jdbcTemplate.queryForObject(sqlGetUserById, new UserMapper(), id);
-            user.setFriends(getFriendsIdByUserId(user.getId())); // TODO: как лучше заполнить массив friends?
+            user.setFriends(getFriendsIdByUserId(user.getId()));
             return user;
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -65,6 +52,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
+        String sqlGetAllUsers = "select id, name, login, email, birthday from users";
         List<User> users = new ArrayList<>();
         for (User user : jdbcTemplate.query(sqlGetAllUsers, new UserMapper())) {
             user.setFriends(getFriendsIdByUserId(user.getId()));
@@ -75,24 +63,30 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(Integer id, Integer friendId) {
-        try {
-            jdbcTemplate.queryForObject(sqlSelectForFriendStatus, Boolean.class, friendId, id);
-            // TODO: как лучше присвоить статус, если в базе нет обратной записи?
-            // TODO: кка лучше сделать апдейт статуса обеих записей
+        String sqlSelectFriendStatus = "select COUNT(status) > 0 " +
+                "from friends " +
+                "where user_id = ? and friend_id = ?";
+        String sqlAddFriend = "insert into friends(user_id, friend_id, status) values (?, ?, ?)";
+        if (Boolean.TRUE.equals(jdbcTemplate.queryForObject(sqlSelectFriendStatus, Boolean.class, friendId, id))) {
             jdbcTemplate.update(sqlAddFriend, id, friendId, true);
             jdbcTemplate.update(sqlAddFriend, friendId, id, true);
-        } catch (EmptyResultDataAccessException e) {
+        } else {
             jdbcTemplate.update(sqlAddFriend, id, friendId, false);
         }
     }
 
     @Override
     public void deleteFriend(Integer id, Integer friendId) {
+        String sqlDeleteFriend = "delete from friends where user_id = ? and friend_id = ?";
         jdbcTemplate.update(sqlDeleteFriend, id, friendId);
     }
 
     @Override
     public List<User> getAllFriends(Integer id) {
+        String sqlGetFriendsByUserId = "select id, name, login, email, birthday " +
+                "from users u " +
+                "inner join friends f on u.id = f.friend_id " +
+                "where f.user_id = ?";
         List<User> users = new ArrayList<>();
         for (User user : jdbcTemplate.query(sqlGetFriendsByUserId, new UserMapper(), id)) {
             user.setFriends(getFriendsIdByUserId(user.getId()));
@@ -103,6 +97,10 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getMutualFriends(Integer id, Integer otherId) {
+        String sqlGetMutualFriends = "select id, name, login, email, birthday from users where id in (select f.friend_id " +
+                "from friends as f " +
+                "inner join friends as f2 on f.friend_id = f2.friend_id " +
+                "where f.user_id = ? and f2.user_id = ?)";
         List<User> mutualFriends = new ArrayList<>();
         for (User user : jdbcTemplate.query(sqlGetMutualFriends, new UserMapper(), id, otherId)) {
             user.setFriends(getFriendsIdByUserId(user.getId()));
@@ -121,6 +119,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     private Set<Integer> getFriendsIdByUserId(Integer userId) {
+        String sqlGetFriendsIdByUserId = "select friend_id from friends where user_id = ?";
         Set<Integer> friends = new HashSet<>();
         SqlRowSet rsFriends = jdbcTemplate.queryForRowSet(sqlGetFriendsIdByUserId, userId);
         while (rsFriends.next()) {

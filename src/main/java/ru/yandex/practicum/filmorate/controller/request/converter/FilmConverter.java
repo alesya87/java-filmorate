@@ -1,18 +1,30 @@
 package ru.yandex.practicum.filmorate.controller.request.converter;
 
 import ru.yandex.practicum.filmorate.controller.request.CreateFilmRequest;
+import ru.yandex.practicum.filmorate.controller.request.FilmRequest;
+import ru.yandex.practicum.filmorate.controller.request.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 
 public class FilmConverter {
-    public static Film convert(CreateFilmRequest createFilmRequest) {
+    private static Film convertInternal(FilmRequest filmRequest) {
         return Film.builder()
-                .name(createFilmRequest.getName())
-                .description(createFilmRequest.getDescription())
-                .releaseDate(createFilmRequest.getReleaseDate())
-                .duration(createFilmRequest.getDuration())
-                .rate(createFilmRequest.getRate())
-                .mpa(createFilmRequest.getMpa())
-                .genres(createFilmRequest.getGenres())
+                .name(filmRequest.getName())
+                .description(filmRequest.getDescription())
+                .releaseDate(filmRequest.getReleaseDate())
+                .duration(filmRequest.getDuration())
+                .rate(filmRequest.getRate())
+                .mpa(filmRequest.getMpa())
+                .genres(filmRequest.getGenres())
                 .build();
+    }
+
+    public static Film convert(CreateFilmRequest createFilmRequest) {
+        return convertInternal(createFilmRequest);
+    }
+
+    public static Film convert(UpdateFilmRequest updateFilmRequest) {
+        Film film = convertInternal(updateFilmRequest);
+        film.setId(updateFilmRequest.getId());
+        return film;
     }
 }

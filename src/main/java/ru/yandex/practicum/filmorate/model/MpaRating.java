@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class MpaRating {
     private Integer id;
-    private String name; // TODO: нужно ли это поле?
+    private String name;
 }
 

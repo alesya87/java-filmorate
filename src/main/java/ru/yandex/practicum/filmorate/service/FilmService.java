@@ -1,76 +1,112 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.validator.Validator;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
 
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
+    private final LikeStorage likeStorage;
 
-    public FilmService(@Qualifier(value = "filmDBStorage") FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, MpaStorage mpaStorage, GenreStorage genreStorage, LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
+        this.mpaStorage = mpaStorage;
+        this.genreStorage = genreStorage;
+        this.likeStorage = likeStorage;
     }
-    // TODO: почему-то не работает через film.storage,type? Qualifier
 
     public Film add(Film film) {
-        Integer mpaId = film.getMpa().getId();
-        MpaRating mpaRating = filmStorage.getMpaRatingById(mpaId);
+        filmStorage.add(film);
+
+        MpaRating mpaRating = mpaStorage.getMpaRatingByFilmId(film.getId());
         if (mpaRating == null) {
-            throw new EntityNotFoundException("MPA с id " + mpaId + "не существует");
+            throw new EntityNotFoundException("MPA не найден");
         }
-        film.setMpa(mpaRating); // TODO: как правильно добавить объект MPA?
-
-        filmStorage.add(film); // TODO: жанры и мпа добавить в таблицу заранее?
-
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                if (!filmStorage.linkFilmWithGenre(film.getId(), genre.getId())) {
-                    throw new EntityNotFoundException("Фильм с id " + film.getId() + "или жанр м id " + genre.getId() + "не существует");
-                }
-            }
-            film.setGenres(filmStorage.getGenresByFilmId(film.getId())); // TODO: как правильно добавить объект Genre?
-        }
+        film.setMpa(mpaRating);
+        film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
 
         return film;
     }
 
     public Film update(Film film) {
-        filmStorage.checkFilmExists(film);
-        Validator.startValidate(film);
+        int id = film.getId();
+        if (filmStorage.getFilmById(id) == null) {
+            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
+        }
         filmStorage.update(film);
+
+        MpaRating mpaRating = mpaStorage.getMpaRatingByFilmId(film.getId());
+        if (mpaRating == null) {
+            throw new EntityNotFoundException("MPA не найден");
+        }
+        film.setMpa(mpaRating);
+        film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
+        film.setLikes(likeStorage.getLikesByFilmId(film.getId()));
+        film.setRate(likeStorage.getLikesCountByFilmId(film.getId()));
         return film;
     }
 
     public Film getFilmById(Integer id) {
-        filmStorage.checkFilmExistsById(id);
-        return filmStorage.getFilmById(id);
+        Film film = filmStorage.getFilmById(id);
+        if (film == null) {
+            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
+        }
+
+        MpaRating mpaRating = mpaStorage.getMpaRatingByFilmId(film.getId());
+        if (mpaRating == null) {
+            throw new EntityNotFoundException("MPA не найден");
+        }
+        film.setMpa(mpaRating);
+        film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
+        film.setLikes(likeStorage.getLikesByFilmId(film.getId()));
+
+        return film;
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        List<Film> films = filmStorage.getAllFilms();
+        for (Film film : films) {
+            MpaRating mpaRating = mpaStorage.getMpaRatingByFilmId(film.getId());
+            if (mpaRating == null) {
+                throw new EntityNotFoundException("MPA не найден");
+            }
+            film.setMpa(mpaRating);
+            film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
+            film.setLikes(likeStorage.getLikesByFilmId(film.getId()));
+        }
+        return films;
     }
 
     public void addLike(Integer id, Integer userId) {
-        Validator.checkIdIsPositive(userId);
-        Film film = getFilmById(id);
-        film.getLikes().add(userId);
+        if (!likeStorage.addLike(id, userId)) {
+            throw new EntityNotFoundException("Фильма с id " + id + " не найден");
+        }
     }
 
     public void deleteLike(Integer id, Integer userId) {
-        Validator.checkIdIsPositive(userId);
-        Film film = getFilmById(id);
-        film.getLikes().remove(userId);
+        if (!likeStorage.deleteLike(id, userId)) {
+            throw new EntityNotFoundException("Фильма с id " + id + " не найден");
+        }
     }
 
     public List<Film> getFilmsByLikesCount(Integer count) {
-        return filmStorage.getFilmsByLikesCount(count);
+        List<Film> films = filmStorage.getFilmsByLikesCount(count);
+        for (Film film : films) {
+            MpaRating mpaRating = mpaStorage.getMpaRatingByFilmId(film.getId());
+            if (mpaRating == null) {
+                throw new EntityNotFoundException("MPA не найден");
+            }
+            film.setMpa(mpaRating);
+            film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
+            film.setLikes(likeStorage.getLikesByFilmId(film.getId()));
+        }
+        return films;
     }
 }

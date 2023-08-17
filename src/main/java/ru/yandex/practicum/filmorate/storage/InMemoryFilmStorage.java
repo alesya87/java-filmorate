@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@ConditionalOnProperty(name = "film.storage.type", havingValue = "inMemory")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int id;
@@ -42,21 +41,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void checkFilmExists(Film film) {
-        int id = film.getId();
-        if (films.get(id) == null) {
-            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
-        }
-    }
-
-    @Override
-    public void checkFilmExistsById(Integer id) {
-        if (id == null || films.get(id) == null) {
-            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
-        }
-    }
-
-    @Override
     public List<Film> getFilmsByLikesCount(Integer count) {
         List<Film> films = getAllFilms().stream()
                 .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
@@ -65,18 +49,17 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films;
     }
 
-    @Override
-    public MpaRating getMpaRatingById(Integer id) {
-        return null;
+    /*@Override
+    public boolean addLike(Integer id, Integer userId) {
+        Film film = getFilmById(id);
+        film.getLikes().add(userId);
+        return true;
     }
 
     @Override
-    public Set<Genre> getGenresByFilmId(Integer id) {
-        return null;
-    }
-
-    @Override
-    public boolean linkFilmWithGenre(Integer filmId, Integer genreId) {
-        return false;
-    }
+    public boolean deleteLike(Integer id, Integer userId) {
+        Film film = getFilmById(id);
+        film.getLikes().remove(userId);
+        return true;
+    }*/
 }
