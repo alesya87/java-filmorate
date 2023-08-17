@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class FilmoRateApplicationTests {
+class FilmorateApplicationTests {
     private final UserService userService;
     private final FilmService filmService;
     private final GenreService genreService;
