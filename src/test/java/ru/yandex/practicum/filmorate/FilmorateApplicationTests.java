@@ -65,7 +65,7 @@ class FilmorateApplicationTests {
         secondFilm.setLikes(new HashSet<>());
         secondFilm.setGenres(new HashSet<>(Arrays.asList(Genre.builder().id(6).name("Боевик").build())));
 
-        thirdFilm = Film.builder().name("thirdFilm").description("thirdFilm description").releaseDate(LocalDate.of(2023, 05, 10)).duration(121).build();
+        thirdFilm = Film.builder().name("thirdFilm").description("thirdFilm description").releaseDate(LocalDate.of(2023, 5, 10)).duration(121).build();
         thirdFilm.setMpa(MpaRating.builder().id(4).name("R").build());
         thirdFilm.setLikes(new HashSet<>());
         thirdFilm.setGenres(new HashSet<>(Arrays.asList(Genre.builder().id(2).name("Драма").build())));
