@@ -4,6 +4,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.storage.impl.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.rowMapper.MpaRatingRowMapper;
 
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class MpaDbStorage implements MpaStorage {
     public MpaRating getMpaRatingById(Integer id) {
         try {
             String sqlGetMpaRatingById = "select id, name from mpa_ratings where id = ?";
-            MpaRating mpaRating = jdbcTemplate.queryForObject(sqlGetMpaRatingById, new MpaRatingMapper(), id);
+            MpaRating mpaRating = jdbcTemplate.queryForObject(sqlGetMpaRatingById, new MpaRatingRowMapper(), id);
             return mpaRating;
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -29,7 +31,7 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public List<MpaRating> getAllMpaRatings() {
         String sqlGetAllMpaRatings = "select id, name from mpa_ratings";
-        return jdbcTemplate.query(sqlGetAllMpaRatings, new MpaRatingMapper());
+        return jdbcTemplate.query(sqlGetAllMpaRatings, new MpaRatingRowMapper());
     }
 
     @Override
@@ -37,6 +39,6 @@ public class MpaDbStorage implements MpaStorage {
         String sqlGetMpaRatingsByFilmId = "select mpa.id, mpa.name from mpa_ratings mpa " +
                 "inner join films f on mpa.id = f.mpa_id " +
                 "where f.id = ?";
-        return jdbcTemplate.queryForObject(sqlGetMpaRatingsByFilmId, new MpaRatingMapper(), id);
+        return jdbcTemplate.queryForObject(sqlGetMpaRatingsByFilmId, new MpaRatingRowMapper(), id);
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.impl.UserStorage;
+import ru.yandex.practicum.filmorate.storage.rowMapper.UserRowMapper;
 
 import java.util.*;
 
@@ -42,7 +44,7 @@ public class UserDbStorage implements UserStorage {
     public User getUserById(Integer id) {
         String sqlGetUserById = "select id, name, login, email, birthday from users where id = ?";
         try {
-            User user = jdbcTemplate.queryForObject(sqlGetUserById, new UserMapper(), id);
+            User user = jdbcTemplate.queryForObject(sqlGetUserById, new UserRowMapper(), id);
             user.setFriends(getFriendsIdByUserId(user.getId()));
             return user;
         } catch (EmptyResultDataAccessException e) {
@@ -54,7 +56,7 @@ public class UserDbStorage implements UserStorage {
     public List<User> getAllUsers() {
         String sqlGetAllUsers = "select id, name, login, email, birthday from users";
         List<User> users = new ArrayList<>();
-        for (User user : jdbcTemplate.query(sqlGetAllUsers, new UserMapper())) {
+        for (User user : jdbcTemplate.query(sqlGetAllUsers, new UserRowMapper())) {
             user.setFriends(getFriendsIdByUserId(user.getId()));
             users.add(user);
         }
@@ -88,7 +90,7 @@ public class UserDbStorage implements UserStorage {
                 "inner join friends f on u.id = f.friend_id " +
                 "where f.user_id = ?";
         List<User> users = new ArrayList<>();
-        for (User user : jdbcTemplate.query(sqlGetFriendsByUserId, new UserMapper(), id)) {
+        for (User user : jdbcTemplate.query(sqlGetFriendsByUserId, new UserRowMapper(), id)) {
             user.setFriends(getFriendsIdByUserId(user.getId()));
             users.add(user);
         }
@@ -102,7 +104,7 @@ public class UserDbStorage implements UserStorage {
                 "inner join friends as f2 on f.friend_id = f2.friend_id " +
                 "where f.user_id = ? and f2.user_id = ?)";
         List<User> mutualFriends = new ArrayList<>();
-        for (User user : jdbcTemplate.query(sqlGetMutualFriends, new UserMapper(), id, otherId)) {
+        for (User user : jdbcTemplate.query(sqlGetMutualFriends, new UserRowMapper(), id, otherId)) {
             user.setFriends(getFriendsIdByUserId(user.getId()));
             mutualFriends.add(user);
         }

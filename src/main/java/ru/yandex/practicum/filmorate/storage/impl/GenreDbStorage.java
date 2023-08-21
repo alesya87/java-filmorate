@@ -4,6 +4,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.impl.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.rowMapper.GenreRowMapper;
 
 import java.util.*;
 
@@ -19,7 +21,7 @@ public class GenreDbStorage implements GenreStorage {
     public Genre getGenreById(Integer id) {
         String sqlGetGenreById = "select id, name from genres where id = ?";
         try {
-            Genre genre = jdbcTemplate.queryForObject(sqlGetGenreById, new GenreMapper(), id);
+            Genre genre = jdbcTemplate.queryForObject(sqlGetGenreById, new GenreRowMapper(), id);
             return genre;
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -29,7 +31,7 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public List<Genre> getAllGenres() {
         String sqlGetAllGenres = "select id, name from genres";
-        return jdbcTemplate.query(sqlGetAllGenres, new GenreMapper());
+        return jdbcTemplate.query(sqlGetAllGenres, new GenreRowMapper());
     }
 
     public Set<Genre> getGenresByFilmId(Integer id) {
@@ -37,7 +39,7 @@ public class GenreDbStorage implements GenreStorage {
                 "inner join film_genres fg on g.id = fg.genre_id " +
                 "where fg.film_id = ?";
         try {
-            return new HashSet<>(jdbcTemplate.query(sqlGetGenresByFilmId, new GenreMapper(), id));
+            return new HashSet<>(jdbcTemplate.query(sqlGetGenresByFilmId, new GenreRowMapper(), id));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

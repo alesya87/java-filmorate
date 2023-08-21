@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.impl.FilmStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,18 +49,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         Collections.reverse(films);
         return films;
     }
-
-    /*@Override
-    public boolean addLike(Integer id, Integer userId) {
-        Film film = getFilmById(id);
-        film.getLikes().add(userId);
-        return true;
-    }
-
-    @Override
-    public boolean deleteLike(Integer id, Integer userId) {
-        Film film = getFilmById(id);
-        film.getLikes().remove(userId);
-        return true;
-    }*/
 }

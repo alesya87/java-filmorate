@@ -5,9 +5,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.controller.request.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.impl.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.rowMapper.FilmRowMapper;
 
 import java.util.*;
 
@@ -26,7 +29,7 @@ public class FilmDbStorage implements FilmStorage {
                 .withTableName("films")
                 .usingColumns("name", "description", "duration", "release_date", "rate", "mpa_id")
                 .usingGeneratedKeyColumns("id")
-                .executeAndReturnKeyHolder(filmToMap(film))
+                .executeAndReturnKeyHolder(FilmMapper.filmToMap(film))
                 .getKeys();
         film.setId((Integer) keys.get("id"));
 
@@ -62,7 +65,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(Integer id) {
         String sqlGetFilmById = "select id, name, description, duration, release_date, rate from films where id = ?";
         try {
-            return jdbcTemplate.queryForObject(sqlGetFilmById, new FilmMapper(), id);
+            return jdbcTemplate.queryForObject(sqlGetFilmById, new FilmRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -71,25 +74,14 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         String sqlGetAllFilms = "select id, name, description, duration, release_date, rate from films order by id";
-        return jdbcTemplate.query(sqlGetAllFilms, new FilmMapper());
+        return jdbcTemplate.query(sqlGetAllFilms, new FilmRowMapper());
     }
 
     @Override
     public List<Film> getFilmsByLikesCount(Integer count) {
         String sqlGetAllFilmsByLikesCount = "select id, name, description, duration, release_date, rate from films " +
                 "order by rate DESC limit ?";
-        return jdbcTemplate.query(sqlGetAllFilmsByLikesCount, new FilmMapper(), count);
-    }
-
-    private Map<String, Object> filmToMap(Film film) {
-        Map<String, Object> filmMap = new HashMap<>();
-        filmMap.put("name", film.getName());
-        filmMap.put("description", film.getDescription());
-        filmMap.put("duration", film.getDuration());
-        filmMap.put("release_date", film.getReleaseDate());
-        filmMap.put("rate", film.getRate());
-        filmMap.put("mpa_id", film.getMpa().getId());
-        return filmMap;
+        return jdbcTemplate.query(sqlGetAllFilmsByLikesCount, new FilmRowMapper(), count);
     }
 
     private boolean linkFilmWithGenre(Integer filmId, Integer genreId) {
