@@ -13,9 +13,5 @@ public interface FilmStorage {
 
     public List<Film> getAllFilms();
 
-    public void checkFilmExists(Film film);
-
-    public void checkFilmExistsById(Integer id);
-
     public List<Film> getFilmsByLikesCount(Integer count);
 }
