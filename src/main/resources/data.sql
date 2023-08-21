@@ -1,4 +1,3 @@
---select * from films
 insert into genres (name) values ('Комедия');
 insert into genres (name) values ('Драма');
 insert into genres (name) values ('Мультфильм');

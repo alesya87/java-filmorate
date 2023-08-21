@@ -12,10 +12,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
-import ru.yandex.practicum.filmorate.service.impl.GenreServiceImpl;
-import ru.yandex.practicum.filmorate.service.impl.MpaServiceImpl;
-import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.MpaService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 
 import java.time.LocalDate;
@@ -31,10 +31,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmorateApplicationTests {
-    private final UserServiceImpl userServiceImpl;
-    private final FilmServiceImpl filmServiceImpl;
-    private final GenreServiceImpl genreServiceImpl;
-    private final MpaServiceImpl mpaServiceImpl;
+    private final UserService userService;
+    private final FilmService filmService;
+    private final GenreService genreService;
+    private final MpaService mpaService;
     private final LikeStorage likeStorage;
     private User firstUser;
     private User firstUserUpdate;
@@ -73,22 +73,22 @@ class FilmorateApplicationTests {
 
     @Test
     public void shouldAddUserWithId1() {
-        User user = userServiceImpl.add(firstUser);
+        User user = userService.add(firstUser);
         assertEquals(1, user.getId());
     }
 
     @Test
     public void shouldAddUserWithId2() {
-        userServiceImpl.add(firstUser);
-        User user = userServiceImpl.add(secondUser);
+        userService.add(firstUser);
+        User user = userService.add(secondUser);
         assertEquals(2, user.getId());
     }
 
     @Test
     public void shouldUpdateUser() {
-        userServiceImpl.add(firstUser);
-        userServiceImpl.update(firstUserUpdate);
-        User user = userServiceImpl.getUserById(1);
+        userService.add(firstUser);
+        userService.update(firstUserUpdate);
+        User user = userService.getUserById(1);
         assertEquals("firstUserUpdate", user.getName());
         assertEquals("firstUserUpdate", user.getLogin());
         assertEquals("firstUserUpdate@ya.ru", user.getEmail());
@@ -96,90 +96,90 @@ class FilmorateApplicationTests {
 
     @Test
     public void shouldReturnUserById() {
-        userServiceImpl.add(firstUser);
-        User user = userServiceImpl.getUserById(1);
+        userService.add(firstUser);
+        User user = userService.getUserById(1);
         assertEquals("firstUser", user.getName());
     }
 
     @Test
     public void shouldThrowEntityNotFoundExceptionIfUserEmptyWhenGetUserById() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> userServiceImpl.getUserById(1));
+                () -> userService.getUserById(1));
         assertEquals("Пользователя с id 1 не существует", exception.getMessage());
     }
 
     @Test
     public void shouldReturnAllUsers() {
-        userServiceImpl.add(firstUser);
-        userServiceImpl.add(secondUser);
-        userServiceImpl.add(thirdUser);
-        assertEquals(3, userServiceImpl.getAllUsers().size());
+        userService.add(firstUser);
+        userService.add(secondUser);
+        userService.add(thirdUser);
+        assertEquals(3, userService.getAllUsers().size());
     }
 
     @Test
     public void shouldReturnEmptyArrayIfNoUsersWhenGetAllUsers() {
-        assertEquals(0, userServiceImpl.getAllUsers().size());
+        assertEquals(0, userService.getAllUsers().size());
     }
 
     @Test
     public void shouldAddFriend() {
-        User user1 = userServiceImpl.add(firstUser);
-        User user2 = userServiceImpl.add(secondUser);
-        userServiceImpl.addFriend(user1.getId(), user2.getId());
-        assertEquals(1, userServiceImpl.getAllFriends(user1.getId()).size());
-        assertEquals(2, userServiceImpl.getAllFriends(user1.getId()).get(0).getId());
+        User user1 = userService.add(firstUser);
+        User user2 = userService.add(secondUser);
+        userService.addFriend(user1.getId(), user2.getId());
+        assertEquals(1, userService.getAllFriends(user1.getId()).size());
+        assertEquals(2, userService.getAllFriends(user1.getId()).get(0).getId());
     }
 
     @Test
     public void shouldDeleteFriend() {
-        User user1 = userServiceImpl.add(firstUser);
-        User user2 = userServiceImpl.add(secondUser);
-        userServiceImpl.addFriend(user1.getId(), user2.getId());
-        userServiceImpl.deleteFriend(user1.getId(), user2.getId());
-        assertEquals(0, userServiceImpl.getAllFriends(user1.getId()).size());
+        User user1 = userService.add(firstUser);
+        User user2 = userService.add(secondUser);
+        userService.addFriend(user1.getId(), user2.getId());
+        userService.deleteFriend(user1.getId(), user2.getId());
+        assertEquals(0, userService.getAllFriends(user1.getId()).size());
     }
 
     @Test
     public void shouldReturnMutualFriends() {
-        User user1 = userServiceImpl.add(firstUser);
-        User user2 = userServiceImpl.add(secondUser);
-        User user3 = userServiceImpl.add(thirdUser);
-        userServiceImpl.addFriend(user1.getId(), user2.getId());
-        userServiceImpl.addFriend(user3.getId(), user2.getId());
-        assertEquals(1, userServiceImpl.getMutualFriends(user1.getId(), user3.getId()).size());
-        assertEquals(2, userServiceImpl.getMutualFriends(user1.getId(), user3.getId()).get(0).getId());
+        User user1 = userService.add(firstUser);
+        User user2 = userService.add(secondUser);
+        User user3 = userService.add(thirdUser);
+        userService.addFriend(user1.getId(), user2.getId());
+        userService.addFriend(user3.getId(), user2.getId());
+        assertEquals(1, userService.getMutualFriends(user1.getId(), user3.getId()).size());
+        assertEquals(2, userService.getMutualFriends(user1.getId(), user3.getId()).get(0).getId());
     }
 
     @Test
     public void shouldReturnEmptyArrayGetMutualFriends() {
-        User user1 = userServiceImpl.add(firstUser);
-        User user2 = userServiceImpl.add(secondUser);
-        assertEquals(0, userServiceImpl.getMutualFriends(user1.getId(), user2.getId()).size());
+        User user1 = userService.add(firstUser);
+        User user2 = userService.add(secondUser);
+        assertEquals(0, userService.getMutualFriends(user1.getId(), user2.getId()).size());
     }
 
     @Test
     public void shouldAddFilmWithId1() {
-        Film film = filmServiceImpl.add(firstFilm);
+        Film film = filmService.add(firstFilm);
         assertEquals(1, film.getId());
     }
 
     @Test
     public void shouldAddFilmWithId2() {
-        filmServiceImpl.add(firstFilm);
-        Film film = filmServiceImpl.add(secondFilm);
+        filmService.add(firstFilm);
+        Film film = filmService.add(secondFilm);
         assertEquals(2, film.getId());
     }
 
     @Test
     public void shouldUpdateFilmWithNewGenreAndMpa() {
-        Film film = filmServiceImpl.add(firstFilm);
+        Film film = filmService.add(firstFilm);
         assertEquals(2, film.getGenres().size());
         List<Genre> genres = new ArrayList<>(film.getGenres());
         assertEquals(1, genres.get(0).getId());
         assertEquals(2, genres.get(1).getId());
         assertEquals(1, film.getMpa().getId());
-        filmServiceImpl.update(firstFilmUpdate);
-        Film filmUpdate = filmServiceImpl.getFilmById(1);
+        filmService.update(firstFilmUpdate);
+        Film filmUpdate = filmService.getFilmById(1);
         List<Genre> genresUpdate = new ArrayList<>(filmUpdate.getGenres());
         assertEquals(6, genresUpdate.get(0).getId());
         assertEquals("firstFilmUpdate", filmUpdate.getName());
@@ -189,99 +189,99 @@ class FilmorateApplicationTests {
 
     @Test
     public void shouldReturnFilmById() {
-        filmServiceImpl.add(firstFilm);
-        Film film = filmServiceImpl.getFilmById(1);
+        filmService.add(firstFilm);
+        Film film = filmService.getFilmById(1);
         assertEquals("firstFilm", film.getName());
     }
 
     @Test
     public void shouldThrowEntityNotFoundExceptionIfFilmEmptyWhenGetFilmById() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> filmServiceImpl.getFilmById(1));
-        assertEquals("Фильма с id 1 не существует", exception.getMessage());
+                () -> filmService.getFilmById(1));
+        assertEquals("Фильм с id 1 не найден", exception.getMessage());
     }
 
     @Test
     public void shouldReturnAllFilms() {
-        filmServiceImpl.add(firstFilm);
-        filmServiceImpl.add(secondFilm);
-        filmServiceImpl.add(thirdFilm);
-        assertEquals(3, filmServiceImpl.getAllFilms().size());
+        filmService.add(firstFilm);
+        filmService.add(secondFilm);
+        filmService.add(thirdFilm);
+        assertEquals(3, filmService.getAllFilms().size());
     }
 
     @Test
     public void shouldReturnEmptyArrayIfNoFilmsWhenGetAllFilms() {
-        assertEquals(0, filmServiceImpl.getAllFilms().size());
+        assertEquals(0, filmService.getAllFilms().size());
     }
 
     @Test
     public void shouldAddAndDeleteLike() {
-        Film film = filmServiceImpl.add(firstFilm);
-        User user = userServiceImpl.add(firstUser);
+        Film film = filmService.add(firstFilm);
+        User user = userService.add(firstUser);
         likeStorage.addLike(film.getId(), user.getId());
-        assertEquals(1, filmServiceImpl.getFilmById(1).getRate());
+        assertEquals(1, filmService.getFilmById(1).getRate());
         likeStorage.deleteLike(film.getId(), user.getId());
-        assertEquals(0, filmServiceImpl.getFilmById(1).getRate());
+        assertEquals(0, filmService.getFilmById(1).getRate());
     }
 
     @Test
     public void shouldReturnFilmsByLikesCount1() {
-        filmServiceImpl.add(firstFilm);
-        userServiceImpl.add(firstUser);
-        Film film = filmServiceImpl.add(secondFilm);
-        User user = userServiceImpl.add(secondUser);
+        filmService.add(firstFilm);
+        userService.add(firstUser);
+        Film film = filmService.add(secondFilm);
+        User user = userService.add(secondUser);
         likeStorage.addLike(film.getId(), user.getId());
-        assertEquals(1, filmServiceImpl.getFilmsByLikesCount(1).size());
-        assertEquals(2, filmServiceImpl.getFilmsByLikesCount(1).get(0).getId());
+        assertEquals(1, filmService.getFilmsByLikesCount(1).size());
+        assertEquals(2, filmService.getFilmsByLikesCount(1).get(0).getId());
     }
 
     @Test
     public void shouldReturnFilmsByLikesCount2() {
-        Film film = filmServiceImpl.add(firstFilm);
-        User user = userServiceImpl.add(firstUser);
-        filmServiceImpl.add(secondFilm);
-        userServiceImpl.add(secondUser);
+        Film film = filmService.add(firstFilm);
+        User user = userService.add(firstUser);
+        filmService.add(secondFilm);
+        userService.add(secondUser);
         likeStorage.addLike(film.getId(), user.getId());
-        assertEquals(2, filmServiceImpl.getFilmsByLikesCount(2).size());
-        assertEquals(1, filmServiceImpl.getFilmsByLikesCount(2).get(0).getId());
+        assertEquals(2, filmService.getFilmsByLikesCount(2).size());
+        assertEquals(1, filmService.getFilmsByLikesCount(2).get(0).getId());
     }
 
     @Test
     public void shouldReturnEmptyArrayWhenGetFilmsByLikesCount1() {
-        assertEquals(0, filmServiceImpl.getFilmsByLikesCount(10).size());
+        assertEquals(0, filmService.getFilmsByLikesCount(10).size());
     }
 
     @Test
     public void shouldReturnMpaById() {
-        assertEquals("G", mpaServiceImpl.getMpaRatingById(1).getName());
+        assertEquals("G", mpaService.getMpaRatingById(1).getName());
     }
 
     @Test
     public void shouldThrowEntityNotFoundExceptionIfMpaEmptyWhenGetMpaById() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> mpaServiceImpl.getMpaRatingById(10));
+                () -> mpaService.getMpaRatingById(10));
         assertEquals("MPA с id 10 не существует", exception.getMessage());
     }
 
     @Test
     public void shouldReturnAllMpa() {
-        assertEquals(5, mpaServiceImpl.getAllMpaRatings().size());
+        assertEquals(5, mpaService.getAllMpaRatings().size());
     }
 
     @Test
     public void shouldReturnGenreById() {
-        assertEquals("Комедия", genreServiceImpl.getGenreById(1).getName());
+        assertEquals("Комедия", genreService.getGenreById(1).getName());
     }
 
     @Test
     public void shouldThrowEntityNotFoundExceptionIfGenreEmptyWhenGetGenreById() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> genreServiceImpl.getGenreById(10));
+                () -> genreService.getGenreById(10));
         assertEquals("Жанра с id 10 не существует", exception.getMessage());
     }
 
     @Test
     public void shouldReturnAllGenres() {
-        assertEquals(6, genreServiceImpl.getAllGenres().size());
+        assertEquals(6, genreService.getAllGenres().size());
     }
 }
