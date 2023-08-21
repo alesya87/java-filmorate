@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.controller.request.MpaRatingDto;
+import ru.yandex.practicum.filmorate.controller.request.mapper.MpaRatingMapper;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -23,12 +26,17 @@ public class MpaController {
     private final MpaService mpaService;
 
     @GetMapping("/{id}")
-    public MpaRating getMpaRatingById(@PathVariable("id") @Valid @Positive Integer id) {
-        return mpaService.getMpaRatingById(id);
+    public MpaRatingDto getMpaRatingById(@PathVariable("id") @Valid @Positive Integer id) {
+        return MpaRatingMapper.convert(mpaService.getMpaRatingById(id));
     }
 
     @GetMapping
-    public List<MpaRating> getAllMpaRatings() {
-        return mpaService.getAllMpaRatings();
+    public List<MpaRatingDto> getAllMpaRatings() {
+
+        List<MpaRatingDto> mpaRatingDtos = new ArrayList<>();
+        for (MpaRating mpaRating : mpaService.getAllMpaRatings()) {
+            mpaRatingDtos.add(MpaRatingMapper.convert(mpaRating));
+        }
+        return mpaRatingDtos;
     }
 }

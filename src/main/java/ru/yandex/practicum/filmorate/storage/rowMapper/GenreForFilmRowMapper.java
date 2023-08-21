@@ -6,12 +6,12 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GenreRowMapper implements RowMapper<Genre> {
+public class GenreForFilmRowMapper implements RowMapper<Genre> {
     @Override
     public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Genre.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
+                .id(rs.getInt("genre_id"))
+                .name(rs.getString("genre_name"))
                 .build();
     }
 }

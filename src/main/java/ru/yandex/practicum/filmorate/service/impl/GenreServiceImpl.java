@@ -8,10 +8,10 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import java.util.List;
 
 @Service
-public class GenreService implements ru.yandex.practicum.filmorate.service.GenreService {
+public class GenreServiceImpl implements ru.yandex.practicum.filmorate.service.GenreService {
     private final GenreStorage genreStorage;
 
-    public GenreService(GenreStorage genreStorage) {
+    public GenreServiceImpl(GenreStorage genreStorage) {
         this.genreStorage = genreStorage;
     }
 

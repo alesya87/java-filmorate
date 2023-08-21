@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller.request.converter;
+package ru.yandex.practicum.filmorate.controller.request.mapper;
 
 import ru.yandex.practicum.filmorate.controller.request.UserWithoutIdDto;
 import ru.yandex.practicum.filmorate.controller.request.UserFullDto;
@@ -31,6 +31,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .login(user.getLogin())
                 .birthday(user.getBirthday())
+                .friends(user.getFriends())
                 .build();
     }
 }

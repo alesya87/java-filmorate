@@ -12,13 +12,13 @@ import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import java.util.List;
 
 @Service
-public class FilmService implements ru.yandex.practicum.filmorate.service.FilmService {
+public class FilmServiceImpl implements ru.yandex.practicum.filmorate.service.FilmService {
     private final FilmStorage filmStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
 
-    public FilmService(FilmStorage filmStorage, MpaStorage mpaStorage, GenreStorage genreStorage, LikeStorage likeStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage, MpaStorage mpaStorage, GenreStorage genreStorage, LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
         this.mpaStorage = mpaStorage;
         this.genreStorage = genreStorage;

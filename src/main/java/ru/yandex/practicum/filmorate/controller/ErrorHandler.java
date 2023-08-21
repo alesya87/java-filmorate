@@ -44,4 +44,10 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handleException(final Exception e) {
+        return new ErrorResponse(e.getMessage());
+    }
 }

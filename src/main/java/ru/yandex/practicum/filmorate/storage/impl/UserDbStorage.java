@@ -1,13 +1,12 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.impl.UserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.rowMapper.UserRowMapper;
 
 import java.util.*;
@@ -42,11 +41,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(Integer id) {
-        String sqlGetUserById = "select id, name, login, email, birthday from users where id = ?";
+        String sqlGetUserById = "select u.id, u.name, u.login, u.email, u.birthday, string_agg(f.friend_id::varchar, ',') as friends\n" +
+                "from users u\n" +
+                "left join friends f on u.id = f.user_id\n" +
+                "where u.id = ?\n" +
+                "group by u.id, u.name, u.login, u.email, u.birthday\n";
         try {
-            User user = jdbcTemplate.queryForObject(sqlGetUserById, new UserRowMapper(), id);
-            user.setFriends(getFriendsIdByUserId(user.getId()));
-            return user;
+            return jdbcTemplate.queryForObject(sqlGetUserById, new UserRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -54,10 +55,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        String sqlGetAllUsers = "select id, name, login, email, birthday from users";
+        String sqlGetAllUsers = "select u.id, u.name, u.login, u.email, u.birthday, string_agg(f.friend_id::varchar, ',') as friends\n" +
+                "from users u\n" +
+                "left join friends f on u.id = f.user_id\n" +
+                "group by u.id, u.name, u.login, u.email, u.birthday\n" +
+                "order by u.id";
         List<User> users = new ArrayList<>();
         for (User user : jdbcTemplate.query(sqlGetAllUsers, new UserRowMapper())) {
-            user.setFriends(getFriendsIdByUserId(user.getId()));
             users.add(user);
         }
         return users;
@@ -85,13 +89,15 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllFriends(Integer id) {
-        String sqlGetFriendsByUserId = "select id, name, login, email, birthday " +
-                "from users u " +
-                "inner join friends f on u.id = f.friend_id " +
-                "where f.user_id = ?";
+        String sqlGetFriendsByUserId = "select u.id, u.name, u.login, u.email, u.birthday, string_agg(fr.friend_id::varchar, ',') as friends\n" +
+                "from users u\n" +
+                "inner join friends f on u.id = f.friend_id\n" +
+                "left join friends fr on fr.user_id = f.friend_id\n" +
+                "where f.user_id = ?\n" +
+                "group by u.id, u.name, u.login, u.email, u.birthday\n" +
+                "order by u.id";
         List<User> users = new ArrayList<>();
         for (User user : jdbcTemplate.query(sqlGetFriendsByUserId, new UserRowMapper(), id)) {
-            user.setFriends(getFriendsIdByUserId(user.getId()));
             users.add(user);
         }
         return users;
@@ -99,13 +105,17 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getMutualFriends(Integer id, Integer otherId) {
-        String sqlGetMutualFriends = "select id, name, login, email, birthday from users where id in (select f.friend_id " +
-                "from friends as f " +
-                "inner join friends as f2 on f.friend_id = f2.friend_id " +
-                "where f.user_id = ? and f2.user_id = ?)";
+        String sqlGetMutualFriends = "select t1.id, t1.name, t1.login, t1.email, t1.birthday, string_agg(fr.friend_id::varchar, ',') as friends from\n" +
+                "(\n" +
+                "select id, name, login, email, birthday from users where id in (select f.friend_id\n" +
+                "from friends as f\n" +
+                "inner join friends as f2 on f.friend_id = f2.friend_id\n" +
+                "where f.user_id = ? and f2.user_id = ?)\n" +
+                ") t1\n" +
+                "left join friends fr on fr.user_id = t1.id\n" +
+                "group by t1.id, t1.name, t1.login, t1.email, t1.birthday\n";;
         List<User> mutualFriends = new ArrayList<>();
         for (User user : jdbcTemplate.query(sqlGetMutualFriends, new UserRowMapper(), id, otherId)) {
-            user.setFriends(getFriendsIdByUserId(user.getId()));
             mutualFriends.add(user);
         }
         return mutualFriends;
@@ -118,15 +128,5 @@ public class UserDbStorage implements UserStorage {
         values.put("email", user.getEmail());
         values.put("birthday", user.getBirthday());
         return values;
-    }
-
-    private Set<Integer> getFriendsIdByUserId(Integer userId) {
-        String sqlGetFriendsIdByUserId = "select friend_id from friends where user_id = ?";
-        Set<Integer> friends = new HashSet<>();
-        SqlRowSet rsFriends = jdbcTemplate.queryForRowSet(sqlGetFriendsIdByUserId, userId);
-        while (rsFriends.next()) {
-            friends.add(rsFriends.getInt("friend_id"));
-        }
-        return friends;
     }
 }

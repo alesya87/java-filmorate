@@ -8,10 +8,10 @@ import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import java.util.List;
 
 @Service
-public class MpaService implements ru.yandex.practicum.filmorate.service.MpaService {
+public class MpaServiceImpl implements ru.yandex.practicum.filmorate.service.MpaService {
     private final MpaStorage mpaStorage;
 
-    public MpaService(MpaStorage mpaStorage) {
+    public MpaServiceImpl(MpaStorage mpaStorage) {
         this.mpaStorage = mpaStorage;
     }
 
