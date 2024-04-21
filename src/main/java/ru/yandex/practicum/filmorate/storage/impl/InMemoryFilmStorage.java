@@ -1,13 +1,15 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@ConditionalOnProperty(name = "film.storage.type", havingValue = "inMemory")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int id;
@@ -40,24 +42,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void checkFilmExists(Film film) {
-        int id = film.getId();
-        if (films.get(id) == null) {
-            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
-        }
-    }
-
-    @Override
-    public void checkFilmExistsById(Integer id) {
-        if (id == null || films.get(id) == null) {
-            throw new EntityNotFoundException("Фильма с id " + id + " не существует");
-        }
-    }
-
-    @Override
     public List<Film> getFilmsByLikesCount(Integer count) {
-        return getAllFilms().stream()
-                .sorted(Comparator.comparing(Film::getRating).reversed())
+        List<Film> films = getAllFilms().stream()
+                .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
                 .limit(count).collect(Collectors.toList());
+        Collections.reverse(films);
+        return films;
     }
 }
